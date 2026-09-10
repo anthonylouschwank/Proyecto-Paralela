@@ -1,0 +1,2 @@
+# Forzar LF: el codigo se compila en WSL y make no tolera CRLF en las recetas.
+* text=auto eol=lf
