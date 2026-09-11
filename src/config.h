@@ -49,9 +49,23 @@ constexpr int kNPorDefecto = 50;
 // (por ejemplo, al arrastrar la ventana).
 constexpr float kDtMaximo = 0.05f;
 
-// Color de fondo (RGB)
+// Color de fondo de la zona secuencial (RGB)
 constexpr unsigned char kFondoR = 28;
 constexpr unsigned char kFondoG = 28;
 constexpr unsigned char kFondoB = 26;
+
+// Zona paralela: franja derecha de la pantalla cuyos chuchos se procesan
+// con OpenMP. Su ancho es un porcentaje de la ventana (0 = todo secuencial,
+// 100 = todo paralelo) y se ajusta en vivo con las flechas.
+constexpr int kZonaPorDefecto = 50;
+constexpr int kPasoZona = 10;
+
+// Color de fondo de la zona paralela y de la linea que la separa (RGB)
+constexpr unsigned char kFondoZonaR = 20;
+constexpr unsigned char kFondoZonaG = 32;
+constexpr unsigned char kFondoZonaB = 58;
+constexpr unsigned char kBordeZonaR = 70;
+constexpr unsigned char kBordeZonaG = 110;
+constexpr unsigned char kBordeZonaB = 190;
 
 }  // namespace config
