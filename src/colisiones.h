@@ -6,16 +6,15 @@
 
 // Detecta y resuelve choques entre chuchos usando cajas envolventes.
 //
-// Se trabaja en dos fases para que el resultado no dependa del orden en que
-// se revisan los pares (salvo redondeo de punto flotante). Asi la version
-// paralela de la Parte 3 se puede comparar contra la secuencial:
+// Se trabaja en dos fases, y cada una recibe la lista de chuchos que debe
+// procesar y si lo hace en paralelo (OpenMP) o en un solo hilo:
 //
-//   Fase 1 (detectar): se recorre el triangulo superior de pares (i < j).
-//     Por cada par que se traslapa y se esta acercando, se anota en un
-//     buffer la velocidad y la rapidez de cada uno en la entrada del otro.
-//     Esta fase solo LEE a los chuchos.
+//   detectar: cada chucho i revisa a TODOS los demas y anota en su propia
+//     entrada del buffer la velocidad y la rapidez de cada companero con el
+//     que se traslapa y se esta acercando. Solo LEE a los chuchos y solo
+//     ESCRIBE la entrada i del buffer.
 //
-//   Fase 2 (aplicar): cada chucho que choco toma
+//   aplicar: cada chucho que choco toma
 //       direccion = la del promedio de las velocidades de sus companeros
 //       rapidez   = el promedio de las rapideces de sus companeros
 //     Con un solo companero esto es intercambiar velocidades (choque
@@ -23,19 +22,32 @@
 //     dentro del rango inicial; promediar los vectores directamente le
 //     quitaria energia al sistema hasta que todos se detienen.
 //
-// La clase guarda los buffers para reutilizarlos entre frames y no pedir
-// memoria nueva cada vez.
+// Por que "cada i revisa a todos" y no el triangulo i < j: en el triangulo,
+// al encontrar un choque se escribe en la entrada i Y en la j, y en paralelo
+// dos hilos podrian escribir la misma j al mismo tiempo (condicion de
+// carrera). Revisando la fila completa cada hilo escribe solo en las
+// entradas de sus propios chuchos, sin locks ni atomics. El costo es hacer
+// N*(N-1) revisiones en vez de N*(N-1)/2.
+//
+// Ademas, cada chucho suma a sus companeros siempre en el mismo orden
+// (j = 0, 1, 2, ...), asi que el resultado es identico bit a bit sin
+// importar cuantos hilos se usen ni que chuchos esten en cada zona.
 class ManejadorColisiones {
 public:
-    // Resuelve los choques del frame actual. Devuelve cuantos pares
-    // chocaron.
-    int resolver(std::vector<Chucho>& chuchos);
+    // Deja los buffers listos para n chuchos. Llamar una vez por frame,
+    // antes de detectar.
+    void preparar(int n);
+
+    // Fase 1 para los chuchos en "indices".
+    void detectar(const std::vector<Chucho>& chuchos, const std::vector<int>& indices,
+                  bool paralelo);
+
+    // Fase 2 para los chuchos en "indices". Debe llamarse cuando ya se
+    // detecto para TODOS los chuchos.
+    void aplicar(std::vector<Chucho>& chuchos, const std::vector<int>& indices,
+                 bool paralelo) const;
 
 private:
-    void prepararBuffers(int n);
-    int detectarChoques(const std::vector<Chucho>& chuchos);
-    void aplicarChoques(std::vector<Chucho>& chuchos) const;
-
     // Por cada chucho i, sumas sobre todos los chuchos j con los que choco:
     // velocidad de j, rapidez de j, y cuantos fueron.
     std::vector<float> sumaVx_;

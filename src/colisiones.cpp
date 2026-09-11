@@ -27,71 +27,84 @@ bool seAcercan(const Chucho& a, const Chucho& b) {
 
 }  // namespace
 
-int ManejadorColisiones::resolver(std::vector<Chucho>& chuchos) {
-    prepararBuffers(static_cast<int>(chuchos.size()));
-    const int pares = detectarChoques(chuchos);
-    aplicarChoques(chuchos);
-    return pares;
+// detectar() sobrescribe la entrada de cada chucho, asi que basta con que
+// los buffers tengan el tamano correcto.
+void ManejadorColisiones::preparar(int n) {
+    sumaVx_.resize(n);
+    sumaVy_.resize(n);
+    sumaRapidez_.resize(n);
+    choques_.resize(n);
 }
 
-void ManejadorColisiones::prepararBuffers(int n) {
-    sumaVx_.assign(n, 0.0f);
-    sumaVy_.assign(n, 0.0f);
-    sumaRapidez_.assign(n, 0.0f);
-    choques_.assign(n, 0);
-}
-
-// Fase 1: O(N^2 / 2) revisiones. Es la region mas cara de la simulacion y la
-// principal candidata a paralelizar. Ojo: al anotar un choque se escribe en
-// la posicion i Y en la j, por eso en paralelo habra que cuidar condiciones
-// de carrera sobre los buffers.
-int ManejadorColisiones::detectarChoques(const std::vector<Chucho>& chuchos) {
+// Region mas cara de la simulacion: O(N) por chucho, O(N^2) en total.
+void ManejadorColisiones::detectar(const std::vector<Chucho>& chuchos,
+                                   const std::vector<int>& indices, bool paralelo) {
+    // Sin chuchos no vale la pena despertar a los hilos.
+    if (indices.empty()) {
+        return;
+    }
     const int n = static_cast<int>(chuchos.size());
-    int pares = 0;
+    const int m = static_cast<int>(indices.size());
 
-    for (int i = 0; i < n; ++i) {
+    // Cada iteracion recorre los n chuchos, asi que todas cuestan casi lo
+    // mismo: schedule(static) basta para repartir la carga parejo.
+    #pragma omp parallel for schedule(static) if (paralelo)
+    for (int k = 0; k < m; ++k) {
+        const int i = indices[k];
         const Chucho& a = chuchos[i];
-        for (int j = i + 1; j < n; ++j) {
+
+        // Acumuladores locales: cada hilo trabaja en sus propias variables
+        // y escribe al buffer una sola vez al final.
+        float vx = 0.0f;
+        float vy = 0.0f;
+        float rapidez = 0.0f;
+        int choques = 0;
+
+        for (int j = 0; j < n; ++j) {
+            if (j == i) {
+                continue;
+            }
             const Chucho& b = chuchos[j];
             if (!seTraslapan(a, b) || !seAcercan(a, b)) {
                 continue;
             }
-
-            // a recibe lo de b y b recibe lo de a
-            sumaVx_[i] += b.vx;
-            sumaVy_[i] += b.vy;
-            sumaRapidez_[i] += std::hypot(b.vx, b.vy);
-            ++choques_[i];
-
-            sumaVx_[j] += a.vx;
-            sumaVy_[j] += a.vy;
-            sumaRapidez_[j] += std::hypot(a.vx, a.vy);
-            ++choques_[j];
-
-            ++pares;
+            vx += b.vx;
+            vy += b.vy;
+            rapidez += std::hypot(b.vx, b.vy);
+            ++choques;
         }
+
+        sumaVx_[i] = vx;
+        sumaVy_[i] = vy;
+        sumaRapidez_[i] = rapidez;
+        choques_[i] = choques;
     }
-    return pares;
 }
 
-// Fase 2: cada chucho solo modifica su propio estado, no hay dependencias.
-void ManejadorColisiones::aplicarChoques(std::vector<Chucho>& chuchos) const {
-    const int n = static_cast<int>(chuchos.size());
+// Cada chucho solo modifica su propio estado, no hay dependencias.
+void ManejadorColisiones::aplicar(std::vector<Chucho>& chuchos,
+                                  const std::vector<int>& indices, bool paralelo) const {
+    if (indices.empty()) {
+        return;
+    }
+    const int m = static_cast<int>(indices.size());
 
-    for (int i = 0; i < n; ++i) {
-        const int k = choques_[i];
-        if (k == 0) {
+    #pragma omp parallel for schedule(static) if (paralelo)
+    for (int k = 0; k < m; ++k) {
+        const int i = indices[k];
+        const int choques = choques_[i];
+        if (choques == 0) {
             continue;
         }
 
         Chucho& c = chuchos[i];
-        const float rapidez = sumaRapidez_[i] / k;
+        const float rapidez = sumaRapidez_[i] / choques;
 
         // Direccion: la del promedio de las velocidades de los companeros.
         // Si se cancelan (p. ej. dos companeros opuestos), el chucho da
         // media vuelta.
-        float dirX = sumaVx_[i] / k;
-        float dirY = sumaVy_[i] / k;
+        float dirX = sumaVx_[i] / choques;
+        float dirY = sumaVy_[i] / choques;
         float largo = std::hypot(dirX, dirY);
         if (largo < 1e-4f) {
             dirX = -c.vx;
