@@ -23,6 +23,25 @@ constexpr float kMaxY = static_cast<float>(kAltoVentana - kTamSprite);
 constexpr float kRapidezMin = 60.0f;
 constexpr float kRapidezMax = 240.0f;
 
+// Caja envolvente para colisiones. Es mas chica que el sprite (64x64)
+// porque el bitmap tiene bordes transparentes: asi los chuchos chocan
+// cuando se tocan los dibujos y no cuando se tocan los cuadros vacios.
+constexpr float kAnchoCaja = 56.0f;
+constexpr float kAltoCaja = 52.0f;
+
+// Color: cada chucho tiene un tono (0-360) y se pinta con esta
+// saturacion y brillo, para que todos los colores sean vivos.
+constexpr float kSaturacionTinte = 0.55f;
+constexpr float kBrilloTinte = 1.0f;
+
+// Al chocar, un chucho gira su tono estos grados (si esta activado).
+// Despues de cambiar de color espera kPausaCambioColor segundos antes de
+// poder cambiar otra vez; sin esto, con N grande los chuchos chocan casi
+// en cada frame y el color parpadea.
+constexpr bool kCambiarTinteAlChocar = true;
+constexpr float kGiroTonoPorChoque = 30.0f;
+constexpr float kPausaCambioColor = 0.3f;
+
 // Cantidad de chuchos si no se pasa N por linea de comandos.
 constexpr int kNPorDefecto = 50;
 

@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "chucho.h"
+#include "colisiones.h"
 #include "config.h"
 #include "hud.h"
 #include "render.h"
@@ -124,6 +125,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::vector<Chucho> chuchos = crearChuchos(op.n, op.semilla);
+    ManejadorColisiones colisiones;
     ContadorFps contador;
 
     std::printf("N = %d, semilla = %u\n", op.n, op.semilla);
@@ -137,7 +139,11 @@ int main(int argc, char* argv[]) {
         tiempoAnterior = tiempoActual;
 
         contador.registrarFrame(dtReal);
+
+        // Simulacion: primero mover y rebotar en bordes, luego resolver
+        // choques con las posiciones ya actualizadas.
         actualizarChuchos(chuchos, SDL_min(dtReal, config::kDtMaximo));
+        colisiones.resolver(chuchos);
 
         dibujarEscena(renderer, texturaChucho, chuchos);
         dibujarHud(renderer, contador.fpsActual(), op.n);

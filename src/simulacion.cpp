@@ -33,5 +33,7 @@ void actualizarChuchos(std::vector<Chucho>& chuchos, float dt) {
 
         rebotarEje(c.x, c.vx, config::kMinX, config::kMaxX);
         rebotarEje(c.y, c.vy, config::kMinY, config::kMaxY);
+
+        c.pausaColor = std::fmax(0.0f, c.pausaColor - dt);
     }
 }

@@ -31,7 +31,9 @@ make clean
 |---|---|
 | `src/config.h` | Constantes: tamaño de ventana y sprite, rango de velocidades, colores. |
 | `src/chucho.h/.cpp` | Estado de un chucho y creación aleatoria de los N chuchos. |
+| `src/color.h/.cpp` | Conversión de tono (HSV) al tinte RGB de cada chucho. |
 | `src/simulacion.h/.cpp` | Paso de simulación: integración de posición y rebote en bordes. |
+| `src/colisiones.h/.cpp` | Choques entre chuchos: detección con cajas envolventes (O(N²)) y respuesta en dos fases. |
 | `src/sprite.h/.cpp` | Bitmap 16×16 del chucho convertido a textura de 64×64. |
 | `src/render.h/.cpp` | Dibujo del fondo y los chuchos (con tinte y volteo según dirección). |
 | `src/hud.h/.cpp` | Contador de FPS y HUD con fuente de píxeles propia. |
@@ -40,5 +42,5 @@ make clean
 ## Avance
 
 - [x] Parte 1: ventana, sprite, movimiento, rebote, N por línea de comandos, HUD de FPS.
-- [ ] Parte 2: colisiones entre chuchos (cajas envolventes, intercambio de velocidades).
+- [x] Parte 2: colisiones entre chuchos (cajas envolventes, intercambio de velocidades, cambio de tinte).
 - [ ] Parte 3: versión paralela con OpenMP y medición de speedup.
