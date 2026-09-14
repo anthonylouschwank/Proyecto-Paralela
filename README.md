@@ -16,10 +16,26 @@ sudo apt install build-essential libsdl2-dev
 ## Compilar y ejecutar
 
 ```bash
-make                                          # genera build/screensaver
+make                                          # genera build/screensaver y build/benchmark
 make run N=500                                # 500 chuchos, zona paralela al 50%
 make run N=2000 ARGS="7 --zona 100 --hilos 4" # semilla 7, todo paralelo, 4 hilos
+make bench                                    # benchmark sin ventana -> resultados/*.csv
 make clean
+```
+
+### Benchmark e informe
+
+`make bench` mide la simulación sin ventana para N = 500, 1000, 2000, 4000 y 1, 2, 4, 8 hilos
+(10 repeticiones de 30 frames cada una). Compara la versión secuencial (triángulo `i<j`) contra
+OpenMP, calcula speedup y eficiencia, y verifica que el resultado sea idéntico bit a bit. Guarda
+`resultados/benchmark.csv` (promedios) y `resultados/benchmark_detalle.csv` (cada medición).
+Opciones: `make bench BENCH_ARGS="--n 1000,2000 --hilos 1,4 --reps 10 --frames 30"`.
+
+El informe está en `informe/informe.tex`. Para actualizar sus tablas después de medir:
+
+```bash
+python informe/generar_tablas.py
+cd informe && pdflatex informe.tex && pdflatex informe.tex
 ```
 
 Directamente: `./build/screensaver [N] [semilla] [--zona P] [--hilos H]`
@@ -79,4 +95,4 @@ chucho suma a sus compañeros siempre en el mismo orden.
 - [x] Parte 1: ventana, sprite, movimiento, rebote, N por línea de comandos, HUD de FPS.
 - [x] Parte 2: colisiones entre chuchos (cajas envolventes, intercambio de velocidades, cambio de tinte).
 - [x] Parte 3: zona paralela con OpenMP, visible en pantalla, con ms por zona en el HUD.
-- [ ] Mediciones de speedup para el reporte.
+- [x] Benchmark (`make bench`) e informe en LaTeX (`informe/`).

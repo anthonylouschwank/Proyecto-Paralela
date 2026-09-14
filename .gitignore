@@ -1,1 +1,7 @@
 build/
+
+# Archivos auxiliares de LaTeX
+informe/*.aux
+informe/*.log
+informe/*.out
+informe/*.toc
