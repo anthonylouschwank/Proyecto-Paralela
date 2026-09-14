@@ -5,7 +5,7 @@
 //   --n 500,1000,2000,4000   cantidades de chuchos a probar
 //   --hilos 1,2,4,8          hilos de OpenMP a probar (por defecto potencias
 //                            de 2 hasta los nucleos disponibles)
-//   --frames 50              frames medidos por repeticion
+//   --frames 30              frames medidos por repeticion
 //   --calentamiento 5        frames que se corren antes de medir
 //   --reps 10                repeticiones de cada configuracion
 //   --semilla 7              semilla de la escena
@@ -34,7 +34,7 @@ namespace {
 struct OpcionesBenchmark {
     std::vector<int> ns{500, 1000, 2000, 4000};
     std::vector<int> hilos;  // vacio = elegir segun los nucleos
-    int frames = 50;
+    int frames = 30;
     int calentamiento = 5;
     int repeticiones = 10;  // la rubrica pide minimo 10 mediciones por prueba
     unsigned int semilla = 7;
@@ -95,7 +95,7 @@ bool parsearArgumentos(int argc, char* argv[], OpcionesBenchmark& op) {
 
 void imprimirUso(const char* programa) {
     std::fprintf(stderr,
-                 "Uso: %s [--n 500,1000] [--hilos 1,2,4,8] [--frames 50] [--calentamiento 5]\n"
+                 "Uso: %s [--n 500,1000] [--hilos 1,2,4,8] [--frames 30] [--calentamiento 5]\n"
                  "          [--reps 10] [--semilla 7] [--salida resultados/benchmark.csv]\n",
                  programa);
 }
