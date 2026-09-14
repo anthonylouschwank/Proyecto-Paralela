@@ -1,5 +1,6 @@
 #include "colisiones.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "config.h"
@@ -78,6 +79,38 @@ void ManejadorColisiones::detectar(const std::vector<Chucho>& chuchos,
         sumaVy_[i] = vy;
         sumaRapidez_[i] = rapidez;
         choques_[i] = choques;
+    }
+}
+
+// Cada chucho i recibe a sus companeros en el mismo orden que en detectar()
+// (primero los j < i, desde las filas anteriores, y luego los j > i desde su
+// propia fila), por eso las sumas dan exactamente lo mismo.
+void ManejadorColisiones::detectarTriangulo(const std::vector<Chucho>& chuchos) {
+    const int n = static_cast<int>(chuchos.size());
+    std::fill(sumaVx_.begin(), sumaVx_.end(), 0.0f);
+    std::fill(sumaVy_.begin(), sumaVy_.end(), 0.0f);
+    std::fill(sumaRapidez_.begin(), sumaRapidez_.end(), 0.0f);
+    std::fill(choques_.begin(), choques_.end(), 0);
+
+    for (int i = 0; i < n; ++i) {
+        const Chucho& a = chuchos[i];
+        for (int j = i + 1; j < n; ++j) {
+            const Chucho& b = chuchos[j];
+            if (!seTraslapan(a, b) || !seAcercan(a, b)) {
+                continue;
+            }
+
+            // a recibe lo de b y b recibe lo de a
+            sumaVx_[i] += b.vx;
+            sumaVy_[i] += b.vy;
+            sumaRapidez_[i] += std::hypot(b.vx, b.vy);
+            ++choques_[i];
+
+            sumaVx_[j] += a.vx;
+            sumaVy_[j] += a.vy;
+            sumaRapidez_[j] += std::hypot(a.vx, a.vy);
+            ++choques_[j];
+        }
     }
 }
 

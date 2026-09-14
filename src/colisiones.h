@@ -42,6 +42,14 @@ public:
     void detectar(const std::vector<Chucho>& chuchos, const std::vector<int>& indices,
                   bool paralelo);
 
+    // Version secuencial de referencia de la fase 1 (la de la Parte 2), para
+    // TODOS los chuchos: recorre solo el triangulo i < j, o sea la mitad de
+    // revisiones, pero al encontrar un choque escribe en i Y en j, por eso no
+    // se puede paralelizar tal cual. Da exactamente el mismo resultado que
+    // detectar(). El benchmark la usa como "mejor version secuencial" para
+    // calcular el speedup.
+    void detectarTriangulo(const std::vector<Chucho>& chuchos);
+
     // Fase 2 para los chuchos en "indices". Debe llamarse cuando ya se
     // detecto para TODOS los chuchos.
     void aplicar(std::vector<Chucho>& chuchos, const std::vector<int>& indices,
