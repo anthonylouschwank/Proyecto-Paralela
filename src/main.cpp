@@ -15,12 +15,12 @@
 #include <SDL.h>
 #include <omp.h>
 
-#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 
+#include "argumentos.h"
 #include "chucho.h"
 #include "config.h"
 #include "estadisticas.h"
@@ -38,19 +38,6 @@ struct Opciones {
     int zona = config::kZonaPorDefecto;
     int hilos = 0;  // 0 = no cambiar lo que decida OpenMP
 };
-
-// Convierte texto a entero dentro de [min, max]. Devuelve false si no es
-// valido.
-bool parsearEntero(const char* texto, long min, long max, long& salida) {
-    char* fin = nullptr;
-    errno = 0;
-    const long valor = std::strtol(texto, &fin, 10);
-    if (errno != 0 || fin == texto || *fin != '\0' || valor < min || valor > max) {
-        return false;
-    }
-    salida = valor;
-    return true;
-}
 
 bool parsearArgumentos(int argc, char* argv[], Opciones& op) {
     op.semilla = static_cast<unsigned int>(std::time(nullptr));
