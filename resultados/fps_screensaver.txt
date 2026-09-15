@@ -1,0 +1,8 @@
+FPS promedio: 246.01 ms por frame -> secuencial: 0.400, openmp: 0.000  n=250 zona=0
+FPS promedio: 160.10 ms por frame -> secuencial: 0.001, openmp: 1.497  n=250 zona=100
+FPS promedio: 93.97 ms por frame -> secuencial: 2.602, openmp: 0.000  n=500 zona=0
+FPS promedio: 95.99 ms por frame -> secuencial: 0.001, openmp: 2.082  n=500 zona=100
+FPS promedio: 46.12 ms por frame -> secuencial: 9.127, openmp: 0.000  n=1000 zona=0
+FPS promedio: 51.73 ms por frame -> secuencial: 0.001, openmp: 3.898  n=1000 zona=100
+FPS promedio: 18.61 ms por frame -> secuencial: 34.679, openmp: 0.000  n=2000 zona=0
+FPS promedio: 22.48 ms por frame -> secuencial: 0.001, openmp: 12.269  n=2000 zona=100
